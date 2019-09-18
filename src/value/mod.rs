@@ -5,6 +5,7 @@ mod ser;
 
 use std::cmp::{Ord, Ordering, PartialOrd};
 use std::collections::BTreeMap;
+use crate::tag::TaggedString;
 
 #[doc(inline)]
 pub use self::de::from_value;
@@ -53,6 +54,8 @@ pub enum Value {
     Map(BTreeMap<Value, Value>),
     /// Semantic Tag
     Tag(u64),
+    /// Tagged String
+    TaggedString(TaggedString),
     // The hidden variant allows the enum to be extended
     // with variants for tags and simple values.
     #[doc(hidden)]
@@ -150,6 +153,7 @@ impl Value {
             Array(_) => 4,
             Map(_) => 5,
             Tag(_) => 6,
+            TaggedString(_) => 8,
             __Hidden => unreachable!(),
         }
     }

@@ -317,3 +317,4 @@ pub use crate::value::Value;
 
 #[cfg(feature = "tags")]
 pub use tag::EncodeCborTag;
+pub use tag::TaggedString;
