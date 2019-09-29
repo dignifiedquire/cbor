@@ -323,4 +323,31 @@ mod std_tests {
             serde_cbor::de::from_slice(&[0xd9, 0xd9, 0xf6, 0x83, 0x01, 0x02, 0x03]).unwrap();
         assert_eq!(value, (55798, (1, 2, 3)));
     }
+
+
+#[cfg(feature = "tags")]
+    #[test]
+    fn test_tagged_string() {
+        /* D8 20             # tag(32)
+           67                # text(7)
+           6578616D706C65 # "example" */
+        use serde_cbor::TaggedString;
+        const CBOR_ENCODED: [u8;10] = [0xd8,0x20,0x67,0x65,0x78,0x61,0x6d,0x70,0x6c,0x65];
+
+        let tagged_string = TaggedString {tag: 32, data: String::from("example")};
+
+        // Serialize tagged string (CBOR encode)
+        let ser_result = serde_cbor::to_vec(&tagged_string).unwrap();
+        assert_eq!(ser_result, CBOR_ENCODED);
+        println!("{:?}", ser_result);
+
+
+       // Deserialize tagged string (CBOR decode)
+        let de_result: (TaggedString) =
+            serde_cbor::de::from_slice_with_scratch(&CBOR_ENCODED, &mut []).unwrap();
+        assert_eq!(32, de_result.tag);
+        assert_eq!(String::from("example"), de_result.data);
+        println!("{:?}", de_result);
+    }
+
 }

@@ -25,6 +25,14 @@ impl serde::Serialize for Value {
             Value::Text(ref v) => serializer.serialize_str(&v),
             Value::Array(ref v) => v.serialize(serializer),
             Value::Tag(v) => serializer.serialize_u64(v),
+            Value::TaggedString(ref v) => {
+                    use serde::ser::SerializeStruct;
+
+                    let mut s = serializer.serialize_struct("EncodeCborTag", 2)?;
+                    s.serialize_field("__cbor_tag_ser_tag", &Value::Tag(v.tag))?;
+                    s.serialize_field("__cbor_tag_ser_data", &v.data.to_owned())?;
+                    return s.end();
+            },
             Value::Map(ref v) => {
                 if v.len() == 2 {
                     use serde::ser::SerializeStruct;

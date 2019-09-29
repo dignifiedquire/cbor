@@ -1,4 +1,5 @@
 use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::de::{Deserialize, Deserializer};
 
 /// Wrapper struct to handle encoding Cbor semantic tags.
 #[derive(Deserialize)]
@@ -36,5 +37,40 @@ impl<T: Serialize> Serialize for EncodeCborTag<T> {
         state.serialize_field("__cbor_tag_ser_tag", &self.__cbor_tag_ser_tag)?;
         state.serialize_field("__cbor_tag_ser_data", &self.__cbor_tag_ser_data)?;
         state.end()
+    }
+}
+
+/// TaggedString
+#[derive(Clone, Debug, PartialEq)]
+pub struct TaggedString {
+    /// Tag
+    pub tag: u64,
+    /// Raw String to be tagged
+    pub data: String,
+}
+
+impl TaggedString {
+    /// Returns tag
+    pub fn tag(&self) -> u64 {
+        return self.tag;
+    }
+}
+
+impl Serialize for TaggedString {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        EncodeCborTag::new(self.tag, &self.data).serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for TaggedString {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let wrapper = EncodeCborTag::deserialize(deserializer)?;
+        Ok(TaggedString {tag: wrapper.tag(), data: wrapper.value() })
     }
 }
